@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Caja Chica Empresa</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Iniciar Sesión</h1>
+    <form id="form-login">
+      <label for="correo">Correo:</label>
+      <input type="email" id="correo" required>
+
+      <label for="contraseña">Contraseña:</label>
+      <input type="password" id="contraseña" required>
+
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="mensaje-login" style="color: red; margin-top: 10px;"></p>
+  </div>
+
+  <script>
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const correo = document.getElementById('correo').value;
+      const contraseña = document.getElementById('contraseña').value;
+
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ correo, contraseña })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          document.getElementById('mensaje-login').textContent = data.mensaje;
+        } else {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('usuario', JSON.stringify(data.usuario));
+          window.location.href = 'caja.login.html'; // ✅ REDIRECCIÓN AL DASHBOARD CORRECTO
+        }
+      } catch (error) {
+        console.error('Error en el login:', error);
+        document.getElementById('mensaje-login').textContent = 'Error al iniciar sesión.';
+      }
+    });
+  </script>
+</body>
+</html>

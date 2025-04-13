@@ -1,120 +1,122 @@
-let ingresos = [];
-let gastos = [];
-
+// Función para agregar un ingreso
 function agregarIngreso() {
-    let fuente = document.getElementById("fuente").value;
-    let monto = parseFloat(document.getElementById("monto-ingreso").value);
-    let fecha = document.getElementById("fecha-ingreso").value;
+    const origen = document.getElementById('origen').value;
+    const monto = parseFloat(document.getElementById('monto-ingreso').value);
+    const fecha = document.getElementById('fecha-ingreso').value;
 
-    if (fuente && !isNaN(monto) && monto > 0 && fecha) {
-        ingresos.push({ fuente, monto, fecha });
-        actualizarListaIngresos();
+    if (origen && !isNaN(monto) && fecha) {
+        const li = document.createElement('li');
+        li.textContent = `${fecha} - ${origen}: S/ ${monto.toFixed(2)}`;
+        document.getElementById('lista-ingresos').appendChild(li);
+        document.getElementById('origen').value = '';
+        document.getElementById('monto-ingreso').value = '';
+        document.getElementById('fecha-ingreso').value = '';
+        actualizarTotales();
         guardarDatos();
+    } else {
+        alert("Por favor, completa todos los campos del ingreso.");
     }
 }
 
+// Función para agregar un gasto
 function agregarGasto() {
-    let descripcion = document.getElementById("descripcion").value;
-    let monto = parseFloat(document.getElementById("monto").value);
-    let categoria = document.getElementById("categoria").value;
-    let fecha = document.getElementById("fecha-gasto").value;
+    const descripcion = document.getElementById('descripcion').value;
+    const monto = parseFloat(document.getElementById('monto').value);
+    const categoria = document.getElementById('categoria').value;
+    const responsable = document.getElementById('responsable').value;
+    const fecha = document.getElementById('fecha-gasto').value;
 
-    if (descripcion && !isNaN(monto) && monto > 0 && fecha) {
-        gastos.push({ descripcion, monto, categoria, fecha });
-        actualizarListaGastos();
+    if (descripcion && !isNaN(monto) && categoria && responsable && fecha) {
+        const li = document.createElement('li');
+        li.textContent = `${fecha} - ${descripcion} (${categoria}) por ${responsable}: S/ ${monto.toFixed(2)}`;
+        document.getElementById('lista-gastos').appendChild(li);
+        document.getElementById('descripcion').value = '';
+        document.getElementById('monto').value = '';
+        document.getElementById('categoria').value = 'Papelería';
+        document.getElementById('responsable').value = '';
+        document.getElementById('fecha-gasto').value = '';
+        actualizarTotales();
         guardarDatos();
+    } else {
+        alert("Por favor, completa todos los campos del gasto.");
     }
 }
 
-function actualizarListaIngresos() {
-    let lista = document.getElementById("lista-ingresos");
-    lista.innerHTML = "";
+// Actualiza totales
+function actualizarTotales() {
     let totalIngresos = 0;
-
-    ingresos.forEach((ingreso, index) => {
-        let item = document.createElement("li");
-        item.innerHTML = `${ingreso.fecha} - ${ingreso.fuente}: S/ ${ingreso.monto.toFixed(2)}
-            <button onclick="eliminarIngreso(${index})">X</button>`;
-        lista.appendChild(item);
-        totalIngresos += ingreso.monto;
+    document.querySelectorAll('#lista-ingresos li').forEach(li => {
+        const monto = parseFloat(li.textContent.split('S/ ')[1]);
+        if (!isNaN(monto)) totalIngresos += monto;
     });
 
-    document.getElementById("total-ingresos").textContent = totalIngresos.toFixed(2);
-    actualizarSaldo();
-}
-
-function actualizarListaGastos() {
-    let lista = document.getElementById("lista-gastos");
-    lista.innerHTML = "";
     let totalGastos = 0;
-
-    gastos.forEach((gasto, index) => {
-        let item = document.createElement("li");
-        item.innerHTML = `${gasto.fecha} - ${gasto.descripcion} (${gasto.categoria}): S/ ${gasto.monto.toFixed(2)}
-            <button onclick="eliminarGasto(${index})">X</button>`;
-        lista.appendChild(item);
-        totalGastos += gasto.monto;
+    document.querySelectorAll('#lista-gastos li').forEach(li => {
+        const monto = parseFloat(li.textContent.split('S/ ')[1]);
+        if (!isNaN(monto)) totalGastos += monto;
     });
 
-    document.getElementById("total-gastos").textContent = totalGastos.toFixed(2);
-    actualizarSaldo();
+    const saldo = totalIngresos - totalGastos;
+
+    document.getElementById('total-ingresos').textContent = totalIngresos.toFixed(2);
+    document.getElementById('total-gastos').textContent = totalGastos.toFixed(2);
+    document.getElementById('saldo').textContent = saldo.toFixed(2);
 }
 
-function eliminarIngreso(index) {
-    ingresos.splice(index, 1);
-    actualizarListaIngresos();
-    guardarDatos();
-}
-
-function eliminarGasto(index) {
-    gastos.splice(index, 1);
-    actualizarListaGastos();
-    guardarDatos();
-}
-
-function actualizarSaldo() {
-    let totalIngresos = ingresos.reduce((sum, i) => sum + i.monto, 0);
-    let totalGastos = gastos.reduce((sum, g) => sum + g.monto, 0);
-    document.getElementById("saldo").textContent = (totalIngresos - totalGastos).toFixed(2);
-}
-
-function guardarDatos() {
-    localStorage.setItem("finanzas", JSON.stringify({ ingresos, gastos }));
-}
-
-function cargarDatos() {
-    let datos = JSON.parse(localStorage.getItem("finanzas"));
-    if (datos) {
-        ingresos = datos.ingresos || [];
-        gastos = datos.gastos || [];
-        actualizarListaIngresos();
-        actualizarListaGastos();
-    }
-}
-
-// Función para descargar el reporte en Excel
+// Descargar datos en Excel
 function descargarExcel() {
-    let wb = XLSX.utils.book_new();
+    const wb = XLSX.utils.book_new();
 
-    let wsIngresos = XLSX.utils.json_to_sheet(ingresos.map((i, index) => ({
-        "#": index + 1,
-        "Fecha": i.fecha,
-        "Fuente": i.fuente,
-        "Monto": `S/ ${i.monto.toFixed(2)}`
-    })));
+    const ingresos = Array.from(document.querySelectorAll('#lista-ingresos li')).map(li => [li.textContent]);
+    const gastos = Array.from(document.querySelectorAll('#lista-gastos li')).map(li => [li.textContent]);
 
-    let wsGastos = XLSX.utils.json_to_sheet(gastos.map((g, index) => ({
-        "#": index + 1,
-        "Fecha": g.fecha,
-        "Descripción": g.descripcion,
-        "Categoría": g.categoria,
-        "Monto": `S/ ${g.monto.toFixed(2)}`
-    })));
+    const wsIngresos = XLSX.utils.aoa_to_sheet([["Ingresos"]].concat(ingresos));
+    const wsGastos = XLSX.utils.aoa_to_sheet([["Gastos"]].concat(gastos));
 
     XLSX.utils.book_append_sheet(wb, wsIngresos, "Ingresos");
     XLSX.utils.book_append_sheet(wb, wsGastos, "Gastos");
 
-    XLSX.writeFile(wb, "Reporte_Finanzas.xlsx");
+    XLSX.writeFile(wb, "reporte_caja_chica.xlsx");
 }
 
-window.onload = cargarDatos;
+// Guardar datos en localStorage
+function guardarDatos() {
+    const ingresos = Array.from(document.querySelectorAll('#lista-ingresos li')).map(li => li.textContent);
+    const gastos = Array.from(document.querySelectorAll('#lista-gastos li')).map(li => li.textContent);
+    localStorage.setItem('datosCaja', JSON.stringify({ ingresos, gastos }));
+}
+
+// Cargar datos desde localStorage
+function cargarDatos() {
+    const datos = JSON.parse(localStorage.getItem('datosCaja'));
+    if (datos) {
+        datos.ingresos.forEach(texto => {
+            const li = document.createElement('li');
+            li.textContent = texto;
+            document.getElementById('lista-ingresos').appendChild(li);
+        });
+        datos.gastos.forEach(texto => {
+            const li = document.createElement('li');
+            li.textContent = texto;
+            document.getElementById('lista-gastos').appendChild(li);
+        });
+        actualizarTotales();
+    }
+}
+
+// Mostrar usuario logueado
+function mostrarNombreUsuario() {
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    if (usuario && usuario.nombre) {
+        const bienvenida = document.getElementById('bienvenida-usuario');
+        if (bienvenida) {
+            bienvenida.textContent = `Bienvenido, ${usuario.nombre}`;
+        }
+    }
+}
+
+// Ejecutar al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    cargarDatos();
+    mostrarNombreUsuario();
+});

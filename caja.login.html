@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Caja Chica Empresarial</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Control de Caja Chica</h1>
+        <p id="bienvenida-usuario"></p>
+
+
+        <h2>Registrar Ingreso</h2>
+        <input type="text" id="origen" placeholder="Origen del ingreso (ej: cliente, reembolso)">
+        <input type="number" id="monto-ingreso" placeholder="Monto S/">
+        <input type="date" id="fecha-ingreso">
+        <button onclick="agregarIngreso()">Agregar Ingreso</button>
+        <ul id="lista-ingresos"></ul>
+
+        <h2>Registrar Gasto</h2>
+        <input type="text" id="descripcion" placeholder="Descripción del gasto">
+        <input type="number" id="monto" placeholder="Monto S/">
+        <select id="categoria">
+            <option value="Papelería">Papelería</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Alimentación">Alimentación</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Otros">Otros</option>
+        </select>
+        <input type="text" id="responsable" placeholder="Responsable del gasto">
+        <input type="date" id="fecha-gasto">
+        <button onclick="agregarGasto()">Agregar Gasto</button>
+        <ul id="lista-gastos"></ul>
+
+        <h3>Total Ingresos: S/ <span id="total-ingresos">0.00</span></h3>
+        <h3>Total Gastos: S/ <span id="total-gastos">0.00</span></h3>
+        <h3>Saldo Disponible: S/ <span id="saldo">0.00</span></h3>
+
+        <button id="btn-descargar" onclick="descargarExcel()">Descargar Reporte Excel</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

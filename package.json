@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "Sistema web para el control y gestión de caja chica empresarial con ingresos, gastos y reporte en Excel.",
   "main": "script.js",
- "scripts": {
-  "test": "echo \"No tests yet\""
-}
+  "scripts": {
+    "test": "echo \"No tests yet\""
   },
   "repository": {
     "type": "git",
